@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -10,15 +10,17 @@
 <script type="text/javascript">
 window.onload = function(){
     var up = new Upload({
-        url : "http://localhost:8848/upload",
+        uploadUrl : "http://localhost:8848/upload",
         cancelUrl:'http://localhost:8848/canel',
         progressUrl:'http://localhost:8848/progress',
         name:'myfile',
         browseWidth:200,
-        baseNode:document.getElementById('div'),
+        uploadWidth:200,
+		progressWidth:300,
+        baseNode:'div',
         components:[0,1,2,3],
         uploadHandler: function (data) {
-            console.log(data)
+            alert(this.getFileName())
         },
         params:{
             a:12

@@ -3,8 +3,7 @@
  * @author：张少龙（zhangshaolong@baidu.com）
  */
 var Upload = (function(){
-    var HIDDEN_REG = /^hidden/i;
-    var INPUT_REG = /^input$/i;
+    var FILE_REG = /^file/i;
     /**
      * 获取dom元素
      * @private param {string|dom|jquery} idOrNode 支持domId，dom元素和jquery包装的dom元素方式
@@ -35,17 +34,17 @@ var Upload = (function(){
      * @private param {Upload对象} o
      */
     var setParams = function(o){
-        var params = o.params,
-            p, pNode, v;
+        var params = o.params, v;
         var form = o.uploadForm;
-        for(p in params){
-            pNode = form[p];
-            if(INPUT_REG.test(pNode.nodeName) && HIDDEN_REG.test(pNode.type)){
-                v = params[p];
+        var hiddens = form.getElementsByTagName('input');
+        for(var i=0,len=hiddens.length; i<len; i++) {
+            var hidd = hiddens[i];
+            v = params[hidd.name];
+            if (v !== undefined) {
                 if(v.constructor === Function){
                     v = v();
                 }
-                pNode.value = v;
+                hidd.value = v;
             }
         }
     };
@@ -160,6 +159,19 @@ var Upload = (function(){
         o.progressForm.submit();
     };
     /**
+     * 获取上传文件名
+     */
+    var getFileName = function(o){
+        var eles = o.uploadContainer.getElementsByTagName("input"),
+            i = 0, len = eles.length, ele;
+        while (i<len) {
+            ele = eles[i++];
+            if(FILE_REG.test(ele.type) && ele.className === 'upload-file'){
+                return ele.value;
+            }
+        }
+    };
+    /**
      * 生成上传文件的input对象
      * @private param {Upload对象} o
      */
@@ -190,13 +202,13 @@ var Upload = (function(){
         form.target = o.uploadIframeId;
         form.enctype = 'multipart/form-data';
         form.encoding = 'multipart/form-data';
-        form.action = o.url;
+        form.action = o.uploadUrl;
         var browseText = document.createElement('div');
         browseText.className = 'browse-text';
         browseText.style.width = o.browseWidth + 'px';
         browseText.style.height = o.height + 'px';
         browseText.style.lineHeight = o.height + 'px';
-        browseText.innerHTML = '浏览';
+        browseText.innerHTML = o.browseButtonText;
         
         var uploadFile = o.uploadFile = document.createElement('input');
         uploadFile.className = 'upload-file';
@@ -246,7 +258,7 @@ var Upload = (function(){
         uploadButton.style.height = o.height + 'px';
         uploadButton.style.lineHeight = o.height + 'px';
         uploadButton.className = 'upload-button';
-        uploadButton.innerHTML = '上传';
+        uploadButton.innerHTML = o.uploadButtonText;
         uploadButton.onclick = function () {
             if (o.uploadFile.value) {
                 submitFile(o);
@@ -272,7 +284,7 @@ var Upload = (function(){
         cancelNode.style.width = o.cancelWidth + 'px';
         cancelNode.style.height = o.height + 'px';
         cancelNode.style.lineHeight = o.height + 'px';
-        cancelNode.title = '取消上传';
+        cancelNode.title = o.uploadCancelText;
         cancelNode.innerHTML = '&times;';
         progressNode.appendChild(finishedNode);
         progressNode.appendChild(cancelNode);
@@ -331,29 +343,53 @@ var Upload = (function(){
     /**
      * 初始化参数
      * @private param {Upload对象} o
-     * @private param {object} 各种配置参数
+     * @private param {object} options 各种配置参数
+     * @private param {string|dom|jquery} options.baseNode 上传组件生成时的定位元素
+     * @private param {array.int} options.components 根据定义顺序展示的组件，默认[0,1,2]（0：文本、1：浏览按钮、2：上传按钮、3：进度条）
+     * @private param {string} options.uploadUrl 提交文件的url
+     * @private param {string} options.cancelUrl 当有进度条时，取消此上传任务的url
+     * @private param {string} options.progressUrl 当有进度条时，获取实时进度的url
+     * @private param {number} options.progressWidth 当有进度条时，进度条区域的宽度，默认100
+     * @private param {number} options.height 上传组件的高度，默认25
+     * @private param {number} options.textWidth 文本区的宽度，默认200
+     * @private param {number} options.browseWidth 浏览按钮的宽度，默认50
+     * @private param {number} options.uploadWidth 上传按钮的宽度，默认50
+     * @private param {number} options.progressInterval 轮询查询进度的时间间隔（ms），默认3000
+     * @private param {boolean} options.mutiAble 是否是多文件上传，默认false
+     * @private param {string} options.dataType 上传的响应数据格式，默认json
+     * @private param {string} options.name 使用哪个名称作为上传文件的字段
+     * @private param {function} options.uploadHandler 上传后的回调处理函数
+     * @private param {object} options.params 上传时需要传递的其他参数信息
+     * @private param {string} options.uploadIframeId 动态的上传iframe指定id，一般不需要指定，只有当此id有冲突时提供设置
+     * @private param {string} options.progressIframeId 动态的进度iframe指定id，一般不需要指定，只有当此id有冲突时提供设置
+     * @private param {string} options.browseButtonText 浏览按钮的显示名称，默认浏览
+     * @private param {string} options.uploadButtonText 上传按钮的显示名称，默认上传
+     * @private param {string} options.uploadCancelText 取消上传title显示名称，默认取消上传
      */
     var initOptions = function (o, options) {
         o.baseNode = getNode(options.baseNode);
+        o.components = options.components || [0, 1, 2];
+        o.uploadUrl = options.uploadUrl;
         o.progressUrl = options.progressUrl;
         o.cancelUrl = options.cancelUrl;
-        o.cancelWidth = options.cancelWidth || 20;
         o.progressWidth = options.progressWidth || 100;
-        o.mutiAble = options.mutiAble;
-        o.dataType = options.dataType || 'json';
-        o.url = options.url;
-        o.name = options.name;
         o.height = options.height || 25;
         o.textWidth = options.textWidth || 200;
         o.browseWidth = options.browseWidth || 50;
         o.uploadWidth = options.uploadWidth || 50;
+        o.progressInterval = options.progressInterval || 3000;
+        o.mutiAble = options.mutiAble;
+        o.dataType = options.dataType || 'json';
+        o.name = options.name;
         o.uploadHandler = options.uploadHandler || function(data){};
         o.params = options.params || {};
-        o.components = options.components || [0, 1, 2, 3];
         o.uploadIframeId = options.uploadIframeId || 'file-upload-iframe';
         o.progressIframeId = options.progressIframeId || 'upload-progress-iframe';
-        o.progressInterval = options.progressInterval || 3000;
+        o.browseButtonText = options.browseButtonText || '浏览';
+        o.uploadButtonText = options.uploadButtonText || '上传';
+        o.uploadCancelText = options.uploadCancelText || '取消上传';
         o.status = 'idle'; // idle or doing
+        o.cancelWidth = 20;
     };
     /**
      * 初始化组件，按照配置进行生成和布局
@@ -431,6 +467,10 @@ var Upload = (function(){
      */
     Upload.prototype.hide = function(){
         this.baseNode.style.display = this.uploadContainer.style.display = 'none';
+    };
+    Upload.prototype.getFileName = function(){
+        var fullName = getFileName(this);
+        return fullName.substr(fullName.lastIndexOf("\\") + 1);
     };
     return Upload;
 })();
