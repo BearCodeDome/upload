@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="css/upload.css" rel="stylesheet" type="text/css" />
+<script src="js/upload.js"></script>
+</head>
+<body>
+<span id="div" ></span>fdsfds
+<script type="text/javascript">
+window.onload = function(){
+    var up = new Upload({
+        url : "http://localhost:8848/upload",
+        cancelUrl:'http://localhost:8848/canel',
+        progressUrl:'http://localhost:8848/progress',
+        name:'myfile',
+        browseWidth:200,
+        baseNode:document.getElementById('div'),
+        components:[0,1,2,3],
+        uploadHandler: function (data) {
+            console.log(data)
+        },
+        params:{
+            a:12
+        }
+    });
+    up.beforeUpload = function(){
+        return true;
+    };
+}
+</script>
+</body>
+</html>
