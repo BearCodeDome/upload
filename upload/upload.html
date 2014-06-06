@@ -5,7 +5,7 @@
 <link href="css/upload.css" rel="stylesheet" type="text/css" />
 <script src="js/upload.js"></script>
 </head>
-<body>
+<body style="height:1000px;">
 <span id="div" ></span>fdsfds
 <script type="text/javascript">
 window.onload = function(){
@@ -18,7 +18,7 @@ window.onload = function(){
         uploadWidth:200,
 		progressWidth:300,
         baseNode:'div',
-        components:[0,1,2,3],
+        components:[1,2,0,3],
         uploadHandler: function (data) {
             alert(this.getFileName())
         },

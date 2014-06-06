@@ -2,22 +2,23 @@
  * @file 异步上传组件
  * @author：张少龙（zhangshaolong@baidu.com）
  */
-var Upload = (function(){
+var Upload = (function (){
     var FILE_REG = /^file/i;
     /**
      * 获取dom元素
-     * @private param {string|dom|jquery} idOrNode 支持domId，dom元素和jquery包装的dom元素方式
+     * @private param {string|dom|jquery} ele 支持domId，dom元素和jquery包装的dom元素方式
      * @return {dom} 返回指定的dom元素
      */
-    var  getNode = function(ele){
-        return typeof ele == 'string' ? document.getElementById(ele) : ele.nodeName ? ele : ele[0];
+    var  getNode = function (ele){
+        return typeof ele == 'string' ? document.getElementById(ele)
+            : ele.nodeName ? ele : ele[0];
     };
     /**
      * 获取元素相对body左上的位置
      * @private param {dom元素} ele
      * @return {object} 返回指定的dom元素相对body左上角的距离
      */
-    var getPoint = function(ele){
+    var getPoint = function (ele){
         var t = ele.offsetTop;
         var l = ele.offsetLeft;
         while (ele = ele.offsetParent) {
@@ -33,11 +34,11 @@ var Upload = (function(){
      * 为上传文件的同时提供传递其他参数
      * @private param {Upload对象} o
      */
-    var setParams = function(o){
+    var setParams = function (o){
         var params = o.params, v;
         var form = o.uploadForm;
         var hiddens = form.getElementsByTagName('input');
-        for(var i=0,len=hiddens.length; i<len; i++) {
+        for (var i = 0, len = hiddens.length; i < len; i++) {
             var hidd = hiddens[i];
             v = params[hidd.name];
             if (v !== undefined) {
@@ -55,7 +56,9 @@ var Upload = (function(){
      */
     var getIframeContent = function (ifm) {
         var bd,
-            doc = ifm.contentWindow ? ifm.contentWindow.document : ifm.contentDocument ? ifm.contentDocument : ifm.document;
+            doc = ifm.contentWindow ? ifm.contentWindow.document
+                    : ifm.contentDocument ? ifm.contentDocument
+                    : ifm.document;
         if(doc){
             bd = doc.body;
         }else{
@@ -73,7 +76,9 @@ var Upload = (function(){
             if(o.componentsMap['3']){
                 resetProgress(o);
                 clearTimeout(o.timer);
-                o.timer = setTimeout(function(){getProgressRate.call(null, o);}, o.progressInterval);
+                o.timer = setTimeout(function (){
+                    getProgressRate.call(null, o);
+                }, o.progressInterval);
             }
             setParams(o);
             o.uploadForm.submit();
@@ -85,7 +90,7 @@ var Upload = (function(){
      * @private param {string} dataType f数据的解析方式
      * @return {*} 返回按照某种格式解析后的数据
      */
-    var parseData = function(data, dataType){
+    var parseData = function (data, dataType){
         switch(dataType){
             case 'json' :
                 return new Function('return ' + data)();
@@ -105,7 +110,8 @@ var Upload = (function(){
     var createIframe = function (id) {
         var ifm;
         try {
-            ifm = document.createElement('<iframe id="' + id + '" name="' + id + '" >');
+            ifm = document.createElement('<iframe id="' + id + '" name="'
+                + id + '" >');
         } catch (e) {
             ifm = document.createElement('iframe');
             ifm.name = ifm.id = id;
@@ -120,9 +126,13 @@ var Upload = (function(){
      * @private param {function} fn 事件处理函数
      */
     var addEvent = function (node, type, fn) {
-        if (node.attachEvent) node.attachEvent('on' + type, fn);
-        else if (node.addEventListener) node.addEventListener(type, fn, !1);
-        else node['on' + type] = fn;
+        if (node.addEventListener) {
+            node.addEventListener(type, fn, !1);
+        } else if (node.attachEvent) {
+            node.attachEvent('on' + type, fn);
+        } else {
+            node['on' + type] = fn;
+        }
     };
     /**
      * 重置进度条到初始化状态
@@ -139,14 +149,15 @@ var Upload = (function(){
      * @private param {Upload对象} o
      * @private param {string} v 当前进度（0~1）
      */
-    var refreshProgress = function(o, v){
+    var refreshProgress = function (o, v){
         clearTimeout(o.timer);
         var intv = parseInt(v);
         if(intv == 1){
             v = intv;
             o.cancelNode.style.display = 'none';
         }else {
-            o.timer = setTimeout(function(){getProgressRate.call(null, o);}, o.progressInterval);
+            o.timer = setTimeout(function (){getProgressRate.call(null, o);},
+                o.progressInterval);
         }
         o.finishedNode.style.width = 100 * v + '%';
     };
@@ -154,17 +165,17 @@ var Upload = (function(){
      * 发送上传进度查询请求
      * @private param {Upload对象} o
      */
-    var getProgressRate = function(o){
+    var getProgressRate = function (o){
         o.progressForm.action = o.progressUrl + '?tmp=' + new Date().getTime();
         o.progressForm.submit();
     };
     /**
      * 获取上传文件名
      */
-    var getFileName = function(o){
+    var getFileName = function (o){
         var eles = o.uploadContainer.getElementsByTagName("input"),
             i = 0, len = eles.length, ele;
-        while (i<len) {
+        while (i < len) {
             ele = eles[i++];
             if(FILE_REG.test(ele.type) && ele.className === 'upload-file'){
                 return ele.value;
@@ -307,7 +318,7 @@ var Upload = (function(){
         cancelNode.onclick = function () {
             var img = new Image();
             window.clearTimeout(o.timer);
-            img.onload = img.onerror = function(){img = null;};
+            img.onload = img.onerror = function (){img = null;};
             img.src = o.cancelUrl;
             o.progressNode.style.display = 'none';
             spaceHolder(o);
@@ -328,14 +339,14 @@ var Upload = (function(){
      * @private param {Upload对象} o
      */
     var initContainer = function (o) {
-        var resizeTimer;
+        var resizeTimer, scrollTimer;
         var uploadContainer = o.uploadContainer = document.createElement('div');
         uploadContainer.className = 'upload-container';
         uploadContainer.style.height = o.height + 'px';
         document.body.appendChild(uploadContainer);
-        addEvent(window, 'resize', function(e){
+        addEvent(window, 'resize', function (e){
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function(){
+            resizeTimer = setTimeout(function (){
                 o.reposition();
             }, 10);
         });
@@ -381,7 +392,7 @@ var Upload = (function(){
         o.mutiAble = options.mutiAble;
         o.dataType = options.dataType || 'json';
         o.name = options.name;
-        o.uploadHandler = options.uploadHandler || function(data){};
+        o.uploadHandler = options.uploadHandler || function (data){};
         o.params = options.params || {};
         o.uploadIframeId = options.uploadIframeId || 'file-upload-iframe';
         o.progressIframeId = options.progressIframeId || 'upload-progress-iframe';
@@ -397,10 +408,10 @@ var Upload = (function(){
      */
     var initComponents = function (o) {
         var componentsMap = o.componentsMap = {};
-        for (var i=0,len=o.components.length; i<len; i++) {
+        for (var i = 0, len = o.components.length; i < len; i++) {
             componentsMap[o.components[i]] = 1;
         }
-        for (var i=0,len=o.components.length; i<len; i++) {
+        for (var i = 0, len = o.components.length; i < len; i++) {
             initComponentsMap[o.components[i]](o);
         }
     };
@@ -459,16 +470,18 @@ var Upload = (function(){
     /**
      * 显示上传组件
      */
-    Upload.prototype.show = function(){
-        this.baseNode.style.display = this.uploadContainer.style.display = 'block';
+    Upload.prototype.show = function (){
+        this.baseNode.style.display = this.uploadContainer.style.display
+            = 'block';
     };
     /**
      * 隐藏上传组件
      */
-    Upload.prototype.hide = function(){
-        this.baseNode.style.display = this.uploadContainer.style.display = 'none';
+    Upload.prototype.hide = function (){
+        this.baseNode.style.display = this.uploadContainer.style.display
+            = 'none';
     };
-    Upload.prototype.getFileName = function(){
+    Upload.prototype.getFileName = function (){
         var fullName = getFileName(this);
         return fullName.substr(fullName.lastIndexOf("\\") + 1);
     };
