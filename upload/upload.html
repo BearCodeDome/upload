@@ -3,10 +3,19 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link href="css/upload.css" rel="stylesheet" type="text/css" />
+<style>
+div {
+    height: 45px;
+}
+</style>
 <script src="js/upload.js"></script>
 </head>
 <body style="height:1000px;">
-<span id="div" ></span>fdsfds
+<div><span id="div" ></span>文本框、浏览、上传、进度条、取消任务布局</div>
+<div><span id="div1" ></span>浏览、上传默认按钮大小布局</div>
+<div><span id="div2" ></span>浏览、文本框默认按钮大小布局</div>
+<div><span id="div3" ></span>浏览、上传。文本框默认按钮大小布局</div>
+<div><span id="div4" ></span>浏览大按钮布局</div>
 <script type="text/javascript">
 window.onload = function(){
     var up = new Upload({
@@ -18,7 +27,7 @@ window.onload = function(){
         uploadWidth:200,
 		progressWidth:300,
         baseNode:'div',
-        components:[1,2,0,3],
+        components:[0,1,2,3],
         uploadHandler: function (data) {
             alert(this.getFileName())
         },
@@ -26,9 +35,56 @@ window.onload = function(){
             a:12
         }
     });
-    up.beforeUpload = function(){
-        return true;
-    };
+    new Upload({
+        uploadUrl : "http://localhost:8848/upload",
+        name:'myfile1',
+        baseNode:'div1',
+        components:[1, 2],
+        uploadHandler: function (data) {
+            alert(this.getFileName())
+        },
+        params:{
+            a:12
+        }
+    });
+    new Upload({
+        uploadUrl : "http://localhost:8848/upload",
+        name:'myfile2',
+        baseNode:'div2',
+        components:[1, 0],
+        uploadHandler: function (data) {
+            alert(this.getFileName())
+        },
+        params:{
+            a:12
+        }
+    });
+    new Upload({
+        uploadUrl : "http://localhost:8848/upload",
+        name:'myfile1',
+        baseNode:'div3',
+        components:[1, 2, 0],
+        uploadHandler: function (data) {
+            alert(this.getFileName())
+        },
+        params:{
+            a:12
+        }
+    });
+    new Upload({
+        uploadUrl : "http://localhost:8848/upload",
+        name:'myfile1',
+        baseNode:'div4',
+        browseWidth:300,
+        height:100,
+        components:[1],
+        uploadHandler: function (data) {
+            alert(this.getFileName())
+        },
+        params:{
+            a:12
+        }
+    });
 }
 </script>
 </body>

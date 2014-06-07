@@ -194,6 +194,9 @@ var Upload = (function (){
         uploadText.style.width = o.textWidth - 10 + 'px';
         o.uploadContainer.appendChild(uploadText);
     };
+    var initUploadForm = function (o) {
+        
+    };
     /**
      * 生成上传浏览按钮
      * @private param {Upload对象} o
@@ -480,6 +483,9 @@ var Upload = (function (){
     Upload.prototype.hide = function (){
         this.baseNode.style.display = this.uploadContainer.style.display
             = 'none';
+    };
+    Upload.prototype.beforeUpload = function () {
+        return true;
     };
     Upload.prototype.getFileName = function (){
         var fullName = getFileName(this);
